@@ -2339,6 +2339,7 @@ _allocAH(const char *FileSpec, const ArchiveFormat fmt,
 	else
 		AH->format = fmt;
 
+	// NOTE: 根据不同的 mode 初始化实体类
 	switch (AH->format)
 	{
 		case archCustom:
@@ -2402,6 +2403,7 @@ WriteDataChunks(ArchiveHandle *AH, ParallelState *pstate)
 			qsort((void *) tes, ntes, sizeof(TocEntry *),
 				  TocEntrySizeCompare);
 
+		// NOTE: 向子进程分发任务
 		for (int i = 0; i < ntes; i++)
 			DispatchJobForTocEntry(AH, pstate, tes[i], ACT_DUMP,
 								   mark_dump_job_done, NULL);
@@ -2474,6 +2476,7 @@ WriteDataChunksForTocEntry(ArchiveHandle *AH, TocEntry *te)
 	/*
 	 * The user-provided DataDumper routine needs to call AH->WriteData
 	 */
+	// 调用 create ArchiveEntry 时设置的 dumpFn 
 	te->dataDumper((Archive *) AH, te->dataDumperArg);
 
 	if (endPtr != NULL)

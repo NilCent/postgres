@@ -1,0 +1,10 @@
+{
+    "tasks": [
+        { 
+            "taskName": "clear",
+            "command": "rm", // Could be any other shell command
+            "args": ["-rf", "${workspaceFolder}/Debug/dumpdir"],
+            "isShellCommand": true
+        }       
+    ],
+}

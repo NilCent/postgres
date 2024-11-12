@@ -856,6 +856,7 @@ RunWorker(ArchiveHandle *AH, ParallelSlot *slot)
 	/*
 	 * Call the setup worker function that's defined in the ArchiveHandle.
 	 */
+	// NOTE: 子进程中设置事物的参数
 	(AH->SetupWorkerPtr) ((Archive *) AH);
 
 	/*
@@ -912,6 +913,7 @@ ParallelBackupStart(ArchiveHandle *AH)
 	pstate->te = NULL;
 	pstate->parallelSlot = NULL;
 
+	// NOTE: 没有指定 -j, 就直接返回
 	if (AH->public.numWorkers == 1)
 		return pstate;
 
@@ -963,6 +965,7 @@ ParallelBackupStart(ArchiveHandle *AH)
 		if (pgpipe(pipeMW) < 0 || pgpipe(pipeWM) < 0)
 			fatal("could not create communication channels: %m");
 
+		// leader 和 child 通过两个管道通信
 		/* leader's ends of the pipes */
 		slot->pipeRead = pipeWM[PIPE_READ];
 		slot->pipeWrite = pipeMW[PIPE_WRITE];
@@ -982,6 +985,7 @@ ParallelBackupStart(ArchiveHandle *AH)
 		slot->hThread = handle;
 		slot->workerStatus = WRKR_IDLE;
 #else							/* !WIN32 */
+		// NOTE: fork 子进程
 		pid = fork();
 		if (pid == 0)
 		{
@@ -1302,6 +1306,7 @@ IsEveryWorkerIdle(ParallelState *pstate)
  * then we know that somebody else has requested an ACCESS EXCLUSIVE lock and
  * so we have a deadlock.  We must fail the backup in that case.
  */
+// NOTE: 执行 pg_dump 时, 不能有表锁的操作
 static void
 lockTableForWorker(ArchiveHandle *AH, TocEntry *te)
 {

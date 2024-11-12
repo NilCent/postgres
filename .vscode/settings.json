@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "*.h": "c",
+        "*.y": "c"
+    },
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "pgDev",
+            "socketPath": "/tmp/.s.PGSQL.5432",
+            "database": "postgres",
+            "username": "nilcent",
+            "password": ""
+        }
+    ]
+}

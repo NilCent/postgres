@@ -734,6 +734,7 @@ main(int argc, char **argv)
 		fatal("parallel backup only supported by the directory format");
 
 	/* Open the output file */
+	// NOTE: 创建抽象类, 包含所有重要的信息
 	fout = CreateArchive(filename, archiveFormat, compressLevel, dosync,
 						 archiveMode, setupDumpWorker);
 
@@ -760,6 +761,7 @@ main(int argc, char **argv)
 	 * Open the database using the Archiver, so it knows about it. Errors mean
 	 * death.
 	 */
+	// NOTE: 父进程连接数据库
 	ConnectDatabase(fout, &dopt.cparams, false);
 	setup_connection(fout, dumpencoding, dumpsnapshot, use_role);
 
@@ -807,6 +809,7 @@ main(int argc, char **argv)
 	pg_log_info("last built-in OID is %u", g_last_builtin_oid);
 
 	/* Expand schema selection patterns into OID lists */
+	// NOTE: 筛选需求 dump 的 schema 和 table
 	if (schema_include_patterns.head != NULL)
 	{
 		expand_schema_name_patterns(fout, &schema_include_patterns,
@@ -939,6 +942,7 @@ main(int argc, char **argv)
 	if (dopt.outputCreateDB)
 		dumpDatabase(fout);
 
+	// NOTE: dump 所有需要 dump 的数据库对象
 	/* Now the rearrangeable objects. */
 	for (i = 0; i < numObjs; i++)
 		dumpDumpableObject(fout, dobjs[i]);
@@ -1010,6 +1014,7 @@ main(int argc, char **argv)
 	if (plainText)
 		RestoreArchive(fout);
 
+	// NOTE: -Fp 会在 RestoreArchive 时 dump, 其余格式在 CloseArchive 时 dump
 	CloseArchive(fout);
 
 	exit_nicely(0);
@@ -1269,12 +1274,13 @@ setup_connection(Archive *AH, const char *dumpencoding,
 			 AH->remoteVersion >= 90200 &&
 			 !dopt->no_synchronized_snapshots)
 	{
+		// NOTE: pg10 之前备机不支持并行 dump
 		if (AH->isStandby && AH->remoteVersion < 100000)
 			fatal("Synchronized snapshots on standby servers are not supported by this server version.\n"
 				  "Run with --no-synchronized-snapshots instead if you do not need\n"
 				  "synchronized snapshots.");
 
-
+		// NOTE: 如果是并行 dump, 在事务中执行 pg_export_snapshot
 		AH->sync_snapshot_id = get_synchronized_snapshot(AH);
 	}
 }
@@ -2695,6 +2701,7 @@ makeTableDataInfo(DumpOptions *dopt, TableInfo *tbinfo)
 	/* OK, let's dump it */
 	tdinfo = (TableDataInfo *) pg_malloc(sizeof(TableDataInfo));
 
+	// NOTE: 设置 dump 类型
 	if (tbinfo->relkind == RELKIND_MATVIEW)
 		tdinfo->dobj.objType = DO_REFRESH_MATVIEW;
 	else if (tbinfo->relkind == RELKIND_SEQUENCE)

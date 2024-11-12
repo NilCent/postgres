@@ -233,6 +233,7 @@ typedef enum
 #define REQ_DATA	0x02		/* want data */
 #define REQ_SPECIAL	0x04		/* for special TOC entries */
 
+// NOTE: ArchiveHandle 的 Head 是 Archive
 struct _archiveHandle
 {
 	Archive		public;			/* Public part of archive */

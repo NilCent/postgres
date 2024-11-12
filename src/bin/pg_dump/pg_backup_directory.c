@@ -577,10 +577,12 @@ _CloseArchive(ArchiveHandle *AH)
 
 		setFilePath(AH, fname, "toc.dat");
 
+		// NOTE: -Fd fork 子进程
 		/* this will actually fork the processes for a parallel backup */
 		ctx->pstate = ParallelBackupStart(AH);
 
 		/* The TOC is always created uncompressed */
+		// NOTE: 创建 toc.dat
 		tocFH = cfopen_write(fname, PG_BINARY_W, 0);
 		if (tocFH == NULL)
 			fatal("could not open output file \"%s\": %m", fname);
@@ -597,6 +599,7 @@ _CloseArchive(ArchiveHandle *AH)
 		WriteToc(AH);
 		if (cfclose(tocFH) != 0)
 			fatal("could not close TOC file: %m");
+		// NOTE: copy 表数据
 		WriteDataChunks(AH, ctx->pstate);
 
 		ParallelBackupEnd(AH, ctx->pstate);
@@ -827,6 +830,7 @@ _DeClone(ArchiveHandle *AH)
  * This function is executed in the child of a parallel backup for a
  * directory-format archive and dumps the actual data for one TOC entry.
  */
+// NOTE: 子进程调用 WriteDataChunksForTocEntry
 static int
 _WorkerJobDumpDirectory(ArchiveHandle *AH, TocEntry *te)
 {
